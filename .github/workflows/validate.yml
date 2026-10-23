@@ -1,0 +1,41 @@
+name: Validate Prompts
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify core artifacts exist
+        run: |
+          test -f SOUL.md
+          test -f system-prompt.md
+          echo "Core artifacts present."
+
+      - name: Enforce SOUL.md line budget (80–120)
+        run: |
+          lines=$(wc -l < SOUL.md)
+          echo "SOUL.md has $lines lines."
+          if [ "$lines" -lt 80 ] || [ "$lines" -gt 120 ]; then
+            echo "SOUL.md must stay within 80–120 lines (currently $lines)."
+            exit 1
+          fi
+
+      - name: Scan for sycophantic opener leakage
+        run: |
+          if grep -niE 'Certamente|Com certeza|Ótima pergunta|Entendo perfeitamente|Fico feliz' SOUL.md system-prompt.md agents/*.md skills/*.md; then
+            echo "Sycophantic language detected in prompt artifacts."
+            exit 1
+          fi
+
+      - name: Install Node deps and typecheck
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci || npm install
+      - run: npx tsc --noEmit
