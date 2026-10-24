@@ -88,7 +88,7 @@ export default function ChatUI({ prompts, agents, models }: Props) {
 
       const stream = client.messages.stream({
         model,
-        max_tokens: 4096,
+        max_tokens: 8192,
         system,
         messages: history.map((m) => ({ role: m.role, content: m.content })),
       });
