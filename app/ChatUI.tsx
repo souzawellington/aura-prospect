@@ -111,7 +111,6 @@ export default function ChatUI({ prompts, agents, models }: Props) {
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       setError(msg);
-      // Rollback the empty assistant placeholder
       setMessages((prev) => {
         if (prev.length && prev[prev.length - 1].role === 'assistant' && !prev[prev.length - 1].content) {
           return prev.slice(0, -1);
@@ -136,79 +135,95 @@ export default function ChatUI({ prompts, agents, models }: Props) {
   }
 
   return (
-    <main className="shell">
-      <header className="topbar">
-        <div className="brand">AURA-PROSPECT</div>
-        <div className="controls">
-          <select value={agent} onChange={(e) => setAgent(e.target.value)} disabled={streaming} aria-label="Agente">
-            {agents.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
-          </select>
-          <select value={model} onChange={(e) => setModel(e.target.value)} disabled={streaming} aria-label="Modelo">
-            {models.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
-          </select>
-          <input
-            type="password"
-            placeholder="sk-ant-..."
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            autoComplete="off"
-            spellCheck={false}
-            aria-label="Anthropic API key"
+    <>
+      <div className="sky" aria-hidden="true">
+        <div className="cloud c1" />
+        <div className="cloud c2" />
+        <div className="cloud c3" />
+        <div className="cloud c4" />
+        <div className="cloud c5" />
+        <div className="cloud c6" />
+      </div>
+
+      <main className="shell">
+        <header className="topbar">
+          <div className="brand">
+            <span className="brand-aura">Aura</span>
+            <span className="brand-prospect">Prospect</span>
+          </div>
+          <div className="controls">
+            <select value={agent} onChange={(e) => setAgent(e.target.value)} disabled={streaming} aria-label="Agente">
+              {agents.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
+            </select>
+            <select value={model} onChange={(e) => setModel(e.target.value)} disabled={streaming} aria-label="Modelo">
+              {models.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
+            </select>
+            <input
+              type="password"
+              placeholder="sk-ant-..."
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              autoComplete="off"
+              spellCheck={false}
+              aria-label="Anthropic API key"
+            />
+            <button onClick={reset} disabled={streaming}>Reset</button>
+          </div>
+        </header>
+
+        <section ref={scrollRef} className="stream">
+          {messages.length === 0 && (
+            <div className="splash">
+              <h1>Aura</h1>
+              <p>
+                Arquiteto Cognitivo com modelagem causal <code>t+1..t+5</code>,
+                inferência ativa <code>PREDICT → OBSERVE → COMPARE → RESOLVE</code>,
+                rejeição contrafactual explícita e portão de paragem conjuntivo <code>|S|/|A| = 1.0</code>.
+              </p>
+              <p>
+                Toda resposta vem no contrato de 4 blocos:{' '}
+                <code>[ESTADO W2 &amp; VIGILÂNCIA PM]</code>,{' '}
+                <code>[SIMULAÇÃO PROACT (t+1 a t+3)]</code>,{' '}
+                <code>[EXECUÇÃO &amp; ARTEFATO DETERMINÍSTICO]</code>,{' '}
+                <code>[AUDITORIA STOP-GATE]</code>.
+              </p>
+              <p className="warn">
+                <strong>BYOK.</strong> Sua chave <code>sk-ant-...</code> fica apenas no seu navegador
+                (<code>localStorage</code>) e as chamadas vão direto para a API da Anthropic.
+                Nenhuma passa por este servidor. Obtenha uma chave em{' '}
+                <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noreferrer" style={{ color: 'var(--accent-strong)', textDecoration: 'underline' }}>
+                  console.anthropic.com
+                </a>.
+              </p>
+            </div>
+          )}
+          {messages.map((m, i) => (
+            <div key={i} className={`msg msg-${m.role}`}>
+              <div className="role">{m.role === 'user' ? 'VOCÊ' : 'AURA'}</div>
+              <pre className="content">{m.content || (streaming && i === messages.length - 1 ? '…' : '')}</pre>
+            </div>
+          ))}
+        </section>
+
+        {error && <div className="error">{error}</div>}
+
+        <footer className="composer">
+          <div className="halo-anchor" aria-hidden="true">
+            <div className={`halo ${streaming ? 'spinning' : ''}`} />
+          </div>
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={onKeyDown}
+            placeholder="Mensagem · Enter envia · Shift+Enter quebra linha"
+            rows={3}
+            disabled={streaming}
           />
-          <button onClick={reset} disabled={streaming}>RESET</button>
-        </div>
-      </header>
-
-      <section ref={scrollRef} className="stream">
-        {messages.length === 0 && (
-          <div className="splash">
-            <h1>AURA-PROSPECT</h1>
-            <p>
-              Arquiteto Cognitivo com modelagem causal <code>t+1..t+5</code>,
-              inferência ativa <code>PREDICT → OBSERVE → COMPARE → RESOLVE</code>,
-              rejeição contrafactual explícita e portão de paragem conjuntivo <code>|S|/|A| = 1.0</code>.
-            </p>
-            <p>
-              Toda resposta vem no contrato de 4 blocos:
-              <code> [ESTADO W2 &amp; VIGILÂNCIA PM]</code>,
-              <code> [SIMULAÇÃO PROACT (t+1 a t+3)]</code>,
-              <code> [EXECUÇÃO &amp; ARTEFATO DETERMINÍSTICO]</code>,
-              <code> [AUDITORIA STOP-GATE]</code>.
-            </p>
-            <p className="warn">
-              <strong>BYOK.</strong> Sua chave <code>sk-ant-...</code> fica apenas no seu navegador
-              (<code>localStorage</code>) e as chamadas vão direto para a API da Anthropic.
-              Nenhuma passa por este servidor. Obtenha uma chave em{' '}
-              <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noreferrer" style={{ color: 'var(--accent)' }}>
-                console.anthropic.com
-              </a>.
-            </p>
-          </div>
-        )}
-        {messages.map((m, i) => (
-          <div key={i} className={`msg msg-${m.role}`}>
-            <div className="role">{m.role === 'user' ? 'VOCÊ' : 'AURA'}</div>
-            <pre className="content">{m.content || (streaming && i === messages.length - 1 ? '…' : '')}</pre>
-          </div>
-        ))}
-        {streaming && <div className="pulse">▊</div>}
-      </section>
-
-      {error && <div className="error">{error}</div>}
-
-      <footer className="composer">
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={onKeyDown}
-          placeholder="Mensagem (Enter envia · Shift+Enter quebra linha)…"
-          rows={3}
-          disabled={streaming}
-        />
-        <button onClick={() => void send()} disabled={streaming || !input.trim()}>
-          {streaming ? 'STREAMING…' : 'ENVIAR'}
-        </button>
-      </footer>
-    </main>
+          <button onClick={() => void send()} disabled={streaming || !input.trim()}>
+            {streaming ? 'STREAMING…' : 'ENVIAR'}
+          </button>
+        </footer>
+      </main>
+    </>
   );
 }
