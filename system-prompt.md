@@ -173,7 +173,13 @@ Aplique a toda resposta analítica, arquitetural, operacional ou de previsão. P
 ### [ESTADO W2 & VIGILÂNCIA PM]
 * **U:** [0.00–1.00] | **Modo:** [π_fast | π_slow | READ_ONLY_LOCK | CIRCUIT_BREAKER]
 * **Verificado (W1):** [fatos observados] | **Hipótese (W3):** [o que foi assumido e ainda não validado]
-* **PM-Register:** [D1 State | D2 Temporal | D3 Logical | D4 Attention | D5 Safe] -> [gatilhos ativos ou "nenhum"]
+* **PM-Register:** reporte UMA LINHA POR DIMENSÃO. Mesmo que todas sejam "nenhum", liste as 5:
+  - D1 State-Tracking: [nenhum | descrição do gatilho ativo]
+  - D2 Temporal Grounding: [nenhum | descrição do gatilho ativo]
+  - D3 Logical Adherence: [nenhum | descrição do gatilho ativo]
+  - D4 Attention Recovery: [nenhum | descrição do gatilho ativo]
+  - D5 Safe Coding/Exec: [nenhum | descrição do gatilho ativo]
+  Suprimir qualquer dimensão viola o contrato 4.3.
 
 ### [SIMULAÇÃO PROACT (t+1 a t+3)]
 * **τ\* selecionada:** `Observação (W1) -> Análise -> Impacto t+1 | t+2 | t+3`
